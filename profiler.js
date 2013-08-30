@@ -415,18 +415,21 @@ __Profiler.prototype._matchEventsWithSections = function() {
  * Gets timing data and calculates
  * when events occured as the original
  * object contains only timestamps.
+ * 
+ * @param {?Object} Information of captured timing data.
+ * If provided, then render this data.
  *
  * @return {Object} Hashmap of the event names
  * and times when they occured relatvely to
  * the page load start.
  */
-__Profiler.prototype._getData = function() {
+__Profiler.prototype._getData = function(timingData) {
   if (!window.performance) {
     return;
   }
   
   var data = window.performance;
-  var timingData = data.timing;
+  var timingData = timingData || data.timing;
   var eventNames = this._getPerfObjKeys(timingData);
   var events = {};
 
@@ -455,8 +458,8 @@ __Profiler.prototype._getData = function() {
 /**
  * Actually init the chart
  */
-__Profiler.prototype._init = function() {
-  this.timingData = this._getData();
+__Profiler.prototype._init = function(timingData) {
+  this.timingData = this._getData(timingData);
   this.sections = this._getSections();
   this.container = this._createContainer();
 
@@ -487,8 +490,9 @@ __Profiler.prototype._init = function() {
  * @param {?Number} timeout Optional timeout to execute
  * timing info. Can be used to catch all events.
  * if not provided will be executed immediately.
+ * @param {?Object} Information of captured timing data.
  */
-__Profiler.prototype.init = function(element, timeout) {
+__Profiler.prototype.init = function(element, timeout, timingData) {
 
   if (element instanceof HTMLElement) {
     this.customElement = element;
@@ -497,9 +501,9 @@ __Profiler.prototype.init = function(element, timeout) {
   if (timeout && parseInt(timeout, 10) > 0) {
     var self = this;
     setTimeout(function() {
-      self._init();
+      self._init(timingData);
     }, timeout);
   } else {
-    this._init();
+    this._init(timingData);
   }
 }
